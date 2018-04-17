@@ -5,12 +5,25 @@
  */
 package modelo;
 
+import java.io.Serializable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
 /**
  *
  * @author Mateus
  */
-public class TipoCliente {
+@Entity
+public class TipoCliente implements Serializable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer codigo;
+
+    @Column(nullable = false)
     private String nome;
 
     public TipoCliente() {
@@ -36,6 +49,5 @@ public class TipoCliente {
     public void setCodigo(Integer codigo) {
         this.codigo = codigo;
     }
-    
-    
+
 }

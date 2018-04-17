@@ -5,16 +5,37 @@
  */
 package modelo;
 
+import java.io.Serializable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+
 /**
  *
  * @author Mateus
  */
-public class Venda {
+@Entity
+public class Venda implements Serializable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer codigo;
-    private String data;
+
+    private String dataVenda;
+
+    @ManyToOne
+    @JoinColumn(name = "produto")
     private Produto produto;
+
+    @Column(nullable = false)
     private Integer quantidade;
-    private Double valorTotal;
+
+    @ManyToOne
+    @JoinColumn(name = "cliente")
     private Cliente cliente;
 
     public Venda() {
@@ -22,7 +43,7 @@ public class Venda {
 
     public Venda(Integer codigo, String data, Produto produto, Integer quantidade, Cliente cliente) {
         this.codigo = codigo;
-        this.data = data;
+        this.dataVenda = data;
         this.produto = produto;
         this.quantidade = quantidade;
         this.cliente = cliente;
@@ -45,11 +66,11 @@ public class Venda {
     }
 
     public String getData() {
-        return data;
+        return dataVenda;
     }
 
     public void setData(String data) {
-        this.data = data;
+        this.dataVenda = data;
     }
 
     public Produto getProduto() {
@@ -71,6 +92,5 @@ public class Venda {
     public Double getValorTotal() {
         return this.quantidade * this.produto.getPreco();
     }
-    
-    
+
 }

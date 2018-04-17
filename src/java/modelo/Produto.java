@@ -5,14 +5,34 @@
  */
 package modelo;
 
+import java.io.Serializable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+
 /**
  *
  * @author Mateus
  */
-public class Produto {
+@Entity
+public class Produto implements Serializable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer codigo;
+
+    @Column(nullable = false)
     private String nome;
+
+    @Column(nullable = false)
     private Double preco;
+
+    @ManyToOne
+    @JoinColumn(name = "tipoProduto")
     private TipoProduto tipo;
 
     public Produto() {
@@ -56,6 +76,5 @@ public class Produto {
     public void setPreco(Double preco) {
         this.preco = preco;
     }
-    
-    
+
 }

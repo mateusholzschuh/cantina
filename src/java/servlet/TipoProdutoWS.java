@@ -5,9 +5,8 @@
  */
 package servlet;
 
+import dao.TipoProdutoDAO;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -35,35 +34,40 @@ public class TipoProdutoWS extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         //Handle the functions [UPDATE - DELETE]
-        if(request.getParameter("funcao") != null) {
+        if (request.getParameter("funcao") != null) {
             //DELETE
-            if(request.getParameter("funcao").equals("del") && request.getParameter("codigo") != null) {
-                TipoProduto tipo = TipoProdutoWS.listar().get(Integer.valueOf(request.getParameter("codigo")));
-                
+            if (request.getParameter("funcao").equals("del") && request.getParameter("codigo") != null) {
+                //Abre conexão com dao
+                TipoProdutoDAO tipodao = new TipoProdutoDAO();
+                TipoProduto tipo = tipodao.buscarPorChavePrimaria(Integer.parseInt(request.getParameter("codigo")));
+                //Fecha dao
+                tipodao.fecharConexao();
+
                 String msg = "Você deletou TipoProduto: { nome : " + tipo.getNome() + ", codigo : " + tipo.getCodigo() + " };";
                 request.setAttribute("msg", msg);
-                
+
                 RequestDispatcher destino;
                 destino = request.getRequestDispatcher("html/tipoproduto/tipo-produto-del.jsp");
                 destino.forward(request, response);
             }
+
             //UPDATE
-            if(request.getParameter("funcao").equals("upd") && request.getParameter("codigo") != null){
+            if (request.getParameter("funcao").equals("upd") && request.getParameter("codigo") != null) {
                 RequestDispatcher destino;
                 destino = request.getRequestDispatcher("html/tipoproduto/tipo-produto-upd.jsp");
                 destino.forward(request, response);
             }
+
             //ADD
-            if(request.getParameter("funcao").equals("add")){
+            if (request.getParameter("funcao").equals("add")) {
                 RequestDispatcher destino;
                 destino = request.getRequestDispatcher("html/tipoproduto/tipo-produto-add.jsp");
                 destino.forward(request, response);
             }
-        }
-        else{
-        
+        } else {
+
             List<TipoProduto> lista = TipoProdutoWS.listar();
             request.setAttribute("dados", lista);
 
@@ -84,12 +88,21 @@ public class TipoProdutoWS extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        TipoProduto tipo;        
+        TipoProduto tipo;
         tipo = new TipoProduto(Integer.valueOf(request.getParameter("txtCodigo")), request.getParameter("txtNome"));
-        
-        String msg = "Você adicionou um novo TipoProduto: { codigo : " + tipo.getCodigo() + ", nome : " + tipo.getNome() +" }";
+
+        /* Adicionar no banco de dados */
+        //Abre conexão
+        TipoProdutoDAO dao = new TipoProdutoDAO();
+        //Insere tipoProduto
+        dao.incluir(tipo);
+        //Fecha conexão
+        dao.fecharConexao();
+        /* -------------------------- */
+
+        String msg = "Você adicionou um novo TipoProduto: { codigo : " + tipo.getCodigo() + ", nome : " + tipo.getNome() + " }";
         request.setAttribute("msg", msg);
-        
+
         RequestDispatcher destino;
         destino = request.getRequestDispatcher("html/tipoproduto/tipo-produto-add-ok.jsp");
         destino.forward(request, response);
@@ -106,21 +119,11 @@ public class TipoProdutoWS extends HttpServlet {
     }
 
     public static List<TipoProduto> listar() {
-        List<TipoProduto> lista = new ArrayList<>();
-        TipoProduto tipo;
-        
-        tipo = new TipoProduto(0, "Bebida");
-        lista.add(tipo);
-        
-        tipo = new TipoProduto(1, "Salgado");
-        lista.add(tipo);
-        
-        tipo = new TipoProduto(2, "Doces");
-        lista.add(tipo);
-        
-        tipo = new TipoProduto(3, "Almoço");
-        lista.add(tipo);
-                
+        //Abre conexão com o banco de dados
+        TipoProdutoDAO dao = new TipoProdutoDAO();
+        //Faz a listagem dos dados
+        List<TipoProduto> lista = dao.listar();
+        //Retorna a lista
         return lista;
     }
 }

@@ -20,10 +20,10 @@
         <h1>Add venda</h1>
         <h2><a href="index.html">Menu</a> - <a href="VendaWS">Voltar</a></h2>
         <form action="VendaWS" method="POST">
-            <label>Código</label>
-            <input type="text" name="txtCodigo"/> <br>
+            <label title="Não é necessário, banco adiciona automaticamente"><s>Código</s></label>
+            <input type="hidden" name="txtCodigo" value="1"/> <br>
             <label>Data</label>
-            <input type="text" name="txtData"/> <br>
+            <input type="date" name="txtData"/> <br>
             <label>Produto</label>
             <select name="txtProduto">
                 <%

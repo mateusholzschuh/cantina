@@ -5,9 +5,9 @@
  */
 package servlet;
 
+import dao.ProdutoDAO;
+import dao.TipoProdutoDAO;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -35,34 +35,40 @@ public class ProdutoWS extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        //Handle the functions [UPDATE - DELETE - ADD]
-        if(request.getParameter("funcao") != null) {
+
+        /* Gerencia as funções [DELETE - UPDATE - ADD] */
+        if (request.getParameter("funcao") != null) {
             //DELETE
-            if(request.getParameter("funcao").equals("del") && request.getParameter("codigo") != null) {
-                Produto prod = ProdutoWS.listar().get(Integer.valueOf(request.getParameter("codigo")));
+            if (request.getParameter("funcao").equals("del") && request.getParameter("codigo") != null) {
+                //Abre conexão com dao
+                ProdutoDAO pdao = new ProdutoDAO();
+                Produto produto = pdao.buscarPorChavePrimaria(Integer.parseInt(request.getParameter("codigo")));
+                //Fecha conexão com dao
+                pdao.fecharConexao();
                 
-                String msg = "Você deletou Produto: { nome : " + prod.getNome() + ", codigo : " + prod.getCodigo() + " };";
+                String msg = "Você deletou Produto: { nome : " + produto.getNome() + ", codigo : " + produto.getCodigo() + " };";
                 request.setAttribute("msg", msg);
-                
+
                 RequestDispatcher destino;
                 destino = request.getRequestDispatcher("html/produto/produto-del.jsp");
                 destino.forward(request, response);
             }
+
             //UPDATE
-            if(request.getParameter("funcao").equals("upd") && request.getParameter("codigo") != null){
+            if (request.getParameter("funcao").equals("upd") && request.getParameter("codigo") != null) {
                 RequestDispatcher destino;
                 destino = request.getRequestDispatcher("html/produto/produto-upd.jsp");
                 destino.forward(request, response);
             }
+
             //ADD
-            if(request.getParameter("funcao").equals("add")){
+            if (request.getParameter("funcao").equals("add")) {
                 RequestDispatcher destino;
                 destino = request.getRequestDispatcher("html/produto/produto-add.jsp");
                 destino.forward(request, response);
             }
-        }
-        else{
-        
+        } else {
+            //FAZ A LISTAGEM
             List<Produto> lista = ProdutoWS.listar();
             request.setAttribute("dados", lista);
 
@@ -83,20 +89,33 @@ public class ProdutoWS extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        Produto tipo;        
-        tipo = new Produto(
-                Integer.valueOf(request.getParameter("txtCodigo")), 
-                request.getParameter("txtNome"), 
-                Double.valueOf(request.getParameter("txtPreco")), 
-                TipoProdutoWS.listar().get(Integer.valueOf(request.getParameter("txtTipo")))
+        //Abre conexão com o dao
+        TipoProdutoDAO tipodao = new TipoProdutoDAO();
+        Produto produto;
+        produto = new Produto(
+                Integer.valueOf(request.getParameter("txtCodigo")),
+                request.getParameter("txtNome"),
+                Double.valueOf(request.getParameter("txtPreco")),
+                tipodao.buscarPorChavePrimaria(Integer.parseInt(request.getParameter("txtTipo")))
         );
-        
-        String msg = "Você adicionou um novo TipoProduto: { codigo : " + 
-                tipo.getCodigo() + ", nome : " + tipo.getNome() +", preco : " + 
-                tipo.getPreco() + ", tipo : " + tipo.getTipo().getNome() + " }";
-        
+        //Fecha conexão com dao
+        tipodao.fecharConexao();
+
+        /* Adicionar no banco de dados */
+        //Abre conexão
+        ProdutoDAO dao = new ProdutoDAO();
+        //Insere produto
+        dao.incluir(produto);
+        //Fecha conexão
+        dao.fecharConexao();
+        /* -------------------------- */
+
+        String msg = "Você adicionou um novo TipoProduto: { codigo : "
+                + produto.getCodigo() + ", nome : " + produto.getNome() + ", preco : "
+                + produto.getPreco() + ", tipo : " + produto.getTipo().getNome() + " }";
+
         request.setAttribute("msg", msg);
-        
+
         RequestDispatcher destino;
         destino = request.getRequestDispatcher("html/produto/produto-add-ok.jsp");
         destino.forward(request, response);
@@ -113,27 +132,13 @@ public class ProdutoWS extends HttpServlet {
     }// </editor-fold>
 
     public static List<Produto> listar() {
-        List<Produto> lista = new ArrayList<>();
-        Produto produto;
-        
-        produto = new Produto(0, "Fruki Laranja 350ml", 3.50, TipoProdutoWS.listar().get(0)); //Bebida
-        lista.add(produto);
-        
-        produto = new Produto(1, "Coca-cola 350ml", 4.50, TipoProdutoWS.listar().get(0)); //Bebida
-        lista.add(produto);
-        
-        produto = new Produto(2, "Croquete", 4.50, TipoProdutoWS.listar().get(1)); //Salgado
-        lista.add(produto);
-        
-        produto = new Produto(3, "Pastel Folhado", 4.00, TipoProdutoWS.listar().get(1)); //Salgado
-        lista.add(produto);
-        
-        produto = new Produto(4, "Balas", 0.25, TipoProdutoWS.listar().get(2)); //Doce
-        lista.add(produto);
-        
-        produto = new Produto(5, "Almoço (kg)", 28.00, TipoProdutoWS.listar().get(3)); //Almoço
-        lista.add(produto);
-        
+        //Conecta com o banco de dados
+        ProdutoDAO dao = new ProdutoDAO();
+        //Faz a listagem
+        List<Produto> lista = dao.listar();
+        //Fecha conexão com o banco
+        dao.fecharConexao();
+        //Retorna a lista
         return lista;
     }
 }

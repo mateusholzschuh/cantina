@@ -15,8 +15,8 @@
         <h1>Add TipoProduto</h1>
         <h2><a href="index.html">Menu</a> - <a href="TipoProdutoWS">Voltar</a></h2>
         <form action="TipoProdutoWS" method="POST">
-            <label>Código</label>
-            <input type="text" name="txtCodigo"/> <br>
+            <label title="Não é necessário, banco adiciona automaticamente"><s>Código</s></label>
+            <input type="hidden" name="txtCodigo" value="1"/> <br>
             <label>Nome</label>
             <input type="text" name="txtNome"/> <br>
             <input type="submit" value="Inserir">

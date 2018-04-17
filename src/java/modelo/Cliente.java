@@ -5,13 +5,31 @@
  */
 package modelo;
 
+import java.io.Serializable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+
 /**
  *
  * @author Mateus
  */
-public class Cliente {
+@Entity
+public class Cliente implements Serializable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer codigo;
+
+    @Column(nullable = false)
     private String nome;
+
+    @ManyToOne
+    @JoinColumn(name = "tipoCliente")
     private TipoCliente tipo;
 
     public Cliente() {
@@ -46,6 +64,5 @@ public class Cliente {
     public void setNome(String nome) {
         this.nome = nome;
     }
-    
-    
+
 }

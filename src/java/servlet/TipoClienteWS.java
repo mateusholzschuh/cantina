@@ -5,9 +5,9 @@
  */
 package servlet;
 
+
+import dao.TipoClienteDAO;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -24,7 +24,6 @@ import modelo.TipoCliente;
 @WebServlet(name = "TipoClienteWS", urlPatterns = {"/TipoClienteWS"})
 public class TipoClienteWS extends HttpServlet {
 
-
     /**
      * Handles the HTTP <code>GET</code> method.
      *
@@ -36,35 +35,40 @@ public class TipoClienteWS extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
-        //Handle the functions [UPDATE - DELETE - ADD]
-        if(request.getParameter("funcao") != null) {
+
+        /* Gerencia funções [DELETE - UPDATE - ADD] */
+        if (request.getParameter("funcao") != null) {
             //DELETE
-            if(request.getParameter("funcao").equals("del") && request.getParameter("codigo") != null) {
-                TipoCliente tipo = TipoClienteWS.listar().get(Integer.valueOf(request.getParameter("codigo")));
-                
+            if (request.getParameter("funcao").equals("del") && request.getParameter("codigo") != null) {
+                //Abre conexão com dao
+                TipoClienteDAO tipodao = new TipoClienteDAO();
+                TipoCliente tipo = tipodao.buscarPorChavePrimaria(Integer.parseInt(request.getParameter("codigo")));
+                //Fecha conexão com dao
+                tipodao.fecharConexao();
+
                 String msg = "Você deletou TipoCliente: { nome : " + tipo.getNome() + ", codigo : " + tipo.getCodigo() + " };";
                 request.setAttribute("msg", msg);
-                
+
                 RequestDispatcher destino;
                 destino = request.getRequestDispatcher("html/tipocliente/tipo-cliente-del.jsp");
                 destino.forward(request, response);
             }
+
             //UPDATE
-            if(request.getParameter("funcao").equals("upd") && request.getParameter("codigo") != null){
+            if (request.getParameter("funcao").equals("upd") && request.getParameter("codigo") != null) {
                 RequestDispatcher destino;
                 destino = request.getRequestDispatcher("html/tipocliente/tipo-cliente-upd.jsp");
                 destino.forward(request, response);
             }
+
             //ADD
-            if(request.getParameter("funcao").equals("add")){
+            if (request.getParameter("funcao").equals("add")) {
                 RequestDispatcher destino;
                 destino = request.getRequestDispatcher("html/tipocliente/tipo-cliente-add.jsp");
                 destino.forward(request, response);
             }
-        }
-        else{
-        
+        } else {
+
             List<TipoCliente> lista = TipoClienteWS.listar();
             request.setAttribute("dados", lista);
 
@@ -85,12 +89,21 @@ public class TipoClienteWS extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        TipoCliente tipo;        
+        TipoCliente tipo;
         tipo = new TipoCliente(Integer.valueOf(request.getParameter("txtCodigo")), request.getParameter("txtNome"));
-        
-        String msg = "Você adicionou um novo TipoCliente: { codigo : " + tipo.getCodigo() + ", nome : " + tipo.getNome() +" }";
+
+        /* Adicionar no banco de dados */
+        //Abre conexão
+        TipoClienteDAO dao = new TipoClienteDAO();
+        //Insere tipoCliente
+        dao.incluir(tipo);
+        //Fecha conexão
+        dao.fecharConexao();
+        /* -------------------------- */
+
+        String msg = "Você adicionou um novo TipoCliente: { codigo : " + tipo.getCodigo() + ", nome : " + tipo.getNome() + " }";
         request.setAttribute("msg", msg);
-        
+
         RequestDispatcher destino;
         destino = request.getRequestDispatcher("html/tipocliente/tipo-cliente-add-ok.jsp");
         destino.forward(request, response);
@@ -107,21 +120,13 @@ public class TipoClienteWS extends HttpServlet {
     }// </editor-fold>
 
     public static List<TipoCliente> listar() {
-        List<TipoCliente> lista = new ArrayList<>();
-        TipoCliente tipo;
-        
-        tipo = new TipoCliente(0, "Aluno");
-        lista.add(tipo);
-        
-        tipo = new TipoCliente(1, "Professor");
-        lista.add(tipo);
-        
-        tipo = new TipoCliente(2, "TAD");
-        lista.add(tipo);
-        
-        tipo = new TipoCliente(3, "Externo");
-        lista.add(tipo);
-        
+        //Conecta com o banco de dados
+        TipoClienteDAO dao = new TipoClienteDAO();
+        //Faz a listagem
+        List<TipoCliente> lista = dao.listar();
+        //Fecha conexão com o banco
+        dao.fecharConexao();
+        //Retorna a lista
         return lista;
     }
 }

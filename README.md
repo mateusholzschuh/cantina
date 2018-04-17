@@ -1,6 +1,6 @@
-##- TRABALHO DE PROGRAMAÇÃO III -
+## - TRABALHO DE PROGRAMAÇÃO III -
 
-####LOG
+#### LOG
 * Criação de classes modelo
 * Criação de servelts respectivos às classes
 * Criação da interface gráfica (JSPs)
